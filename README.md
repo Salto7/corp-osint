@@ -34,17 +34,17 @@ uv sync && uv run playwright install chromium
 Needs [uv](https://docs.astral.sh/uv/), Python 3.10+, network egress.
 
 ```bash
-uv run python -m corp_osint --list-plugins
-uv run python -m corp_osint --plugin azure_tenant --domain microsoft.com
+uv run python main.py --list-plugins
+uv run python main.py --plugin azure_tenant --domain microsoft.com
 ```
 
 ## Quick start (CLI)
 
 ```bash
-uv run python -m corp_osint "Example Corp" --domain example.com --out report.json
-uv run python -m corp_osint "Example Corp" --domain example.com --ticker EXAM --summary-only
-uv run python -m corp_osint "Example Corp" --domain example.com --skip playwright,urlscan
-uv run python -m corp_osint --plugin edgar --company "Example Corp" --ticker EXAM
+uv run python main.py "Example Corp" --domain example.com --out report.json
+uv run python main.py "Example Corp" --domain example.com --ticker EXAM --summary-only
+uv run python main.py "Example Corp" --domain example.com --skip playwright,urlscan
+uv run python main.py --plugin edgar --company "Example Corp" --ticker EXAM
 ```
 
 Stages for `--skip` / `--only`: `edgar`, `urlscan`, `playwright`, `asn`,
@@ -57,7 +57,7 @@ the logger (stderr).
 
 Same pipeline over [MCP](https://modelcontextprotocol.io/) stdio. Open this repo
 as the workspace, run `uv sync && uv run playwright install chromium` once, then
-reload MCP tools. Config: [`.mcp.json`](.mcp.json) / [`.cursor/mcp.json`](.cursor/mcp.json).
+reload MCP tools. Config: [`.mcp.json`](.mcp.json).
 
 ```json
 {
@@ -83,9 +83,9 @@ root. Progress on stderr; stdout is MCP JSON-RPC. Details: [`docs/mcp.md`](docs/
 | [`docs/report-schema.md`](docs/report-schema.md) | Report JSON shape |
 
 ```text
-corp-OSINT/
-  pyproject.toml  mcp_server.py  .mcp.json
-  corp_osint/     # library + CLI (python -m corp_osint)
+corp-osint/
+  pyproject.toml  main.py  mcp_server.py  .mcp.json
+  corp_osint/     # library
   docs/
 ```
 
