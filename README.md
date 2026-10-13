@@ -1,15 +1,13 @@
-# corp-OSINT
+# corp-osint
 
-Lightweight OSINT tool that finds an organization's subsidiaries, brands and related from just a company name with an optional domain or Ticker. It also perform RDAP/WHOIS queries and finds ASN/IP. Then identifies Microsoft Entra tenant IDs and use it to verify domains correlation to the roganization. Finally it attempt to find dangling/parked domains that are still tied to that tenant 
-from **public sources only**. Runs as a CLI or **MCP server** (Cursor, Claude Code,
-Codex, …).
+Lightweight proxy-aware OSINT tool that finds an organization's subsidiaries, brands and related from just a company name with an optional domain or Ticker. It also perform RDAP/WHOIS queries and finds ASN/IP. Then identifies Microsoft Entra tenant IDs and use it to verify domains correlation to the roganization. Finally it attempt to find dangling/parked domains that are still tied to that tenant 
+from **public sources only**. Runs as a CLI or MCP server
 
-No API keys required for the core flow (optional urlscan / DNSLytics keys raise
-limits). Proxy-aware (`--proxy`, `CORP_OSINT_PROXY`, standard `*_PROXY`; `--direct` /
-`NO_PROXY`). Per-host throttles and 429 backoff (+200 ms steps, max 3 s).
+No API keys required for the core flow (optional urlscan / DNSLytics keys raise limits). Proxy-aware (`--proxy`, `CORP_OSINT_PROXY`, standard `*_PROXY`; `--direct` /`NO_PROXY`). Per-host throttles and 429 backoff (incremental +200 ms -> 3 s waits).
 
-> **Authorized research only.** Respect upstream terms and rate limits. No port
-> scanning or unauthorized access.
+> **Authorized use only. Do not run this tool against orgs without explicit written permission.
+
+
 
 ## Features
 
@@ -26,7 +24,7 @@ limits). Proxy-aware (`--proxy`, `CORP_OSINT_PROXY`, standard `*_PROXY`; `--dire
 ## Install
 
 ```bash
-git clone <this-repo> corp-OSINT && cd corp-OSINT
+git clone https://github.com/Salto7/corp-osint.git && cd corp-osint
 # https://docs.astral.sh/uv/getting-started/installation/
 curl -LsSf https://astral.sh/uv/install.sh | sh
 uv sync && uv run playwright install chromium

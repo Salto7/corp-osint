@@ -19,7 +19,7 @@ metadata:
 
 Passive public-source recon only. **Plugin architecture:**
 
-- One entrypoint: `python -m corp_osint`
+- One entrypoint: `uv run python main.py`
 - One abstract base: `corp_osint.plugin.Plugin`
 - All stages live in `corp_osint/plugins/` and inherit `Plugin`
 - Orchestrator: `CorpOsintPipeline(Plugin)` runs registered plugins
@@ -52,8 +52,8 @@ MCP hosts launch via `uv run` (see `.mcp.json`).
 **Verify install:**
 
 ```bash
-uv run python -m corp_osint --list-plugins
-uv run python -m corp_osint --plugin azure_tenant --domain microsoft.com
+uv run python main.py --list-plugins
+uv run python main.py --plugin azure_tenant --domain microsoft.com
 ```
 
 Agents: run the Install block if `uv` is missing or Playwright/Chromium is not installed.
@@ -79,10 +79,10 @@ Agents: run the Install block if `uv` is missing or Playwright/Chromium is not i
 ## Quick run
 
 ```bash
-uv run python -m corp_osint "Example Corp" --domain example.com --out report.json
-uv run python -m corp_osint -v "Example Corp" --domain example.com --summary-only
-uv run python -m corp_osint --list-plugins
-uv run python -m corp_osint --plugin dnslytics_gtm --domain example.com
+uv run python main.py "Example Corp" --domain example.com --out report.json
+uv run python main.py -v "Example Corp" --domain example.com --summary-only
+uv run python main.py --list-plugins
+uv run python main.py --plugin dnslytics_gtm --domain example.com
 ```
 
 Logging (stderr via logger only — no ``print``): default INFO stage progress;
@@ -102,14 +102,14 @@ All aiohttp traffic and Playwright Chromium share one proxy setting:
 
 ```bash
 # SOCKS5
-uv run python -m corp_osint "Example Corp" --domain example.com --proxy socks5://127.0.0.1:1080
+uv run python main.py "Example Corp" --domain example.com --proxy socks5://127.0.0.1:1080
 
 # HTTP proxy + bypass list
-uv run python -m corp_osint --plugin azure_tenant --domain microsoft.com \
+uv run python main.py --plugin azure_tenant --domain microsoft.com \
   --proxy http://127.0.0.1:8080 --no-proxy localhost,127.0.0.1
 
 # Force direct (ignore env proxies)
-uv run python -m corp_osint --plugin azure_tenant --domain microsoft.com --direct
+uv run python main.py --plugin azure_tenant --domain microsoft.com --direct
 ```
 
 Also: `CORP_OSINT_PROXY`, `ALL_PROXY`, `HTTPS_PROXY`, `HTTP_PROXY`, and
@@ -119,7 +119,7 @@ Also: `CORP_OSINT_PROXY`, `ALL_PROXY`, `HTTPS_PROXY`, `HTTP_PROXY`, and
 
 | Piece | Role |
 |-------|------|
-| `python -m corp_osint` | **Single entrypoint** |
+| `uv run python main.py` | **Single entrypoint** |
 | `corp_osint.plugin.Plugin` | **Abstract base** — every module inherits this |
 | `corp_osint.plugins.*` | Concrete plugins (`edgar`, `urlscan`, …) |
 | `corp_osint.plugins.pipeline.CorpOsintPipeline` | Orchestrator plugin (`name="pipeline"`) |
@@ -148,8 +148,8 @@ To add a stage: subclass `Plugin`, implement `async def run(**kwargs)`, register
 Same public flow as https://idefixtools.com/tenant-lookup.html:
 
 ```bash
-uv run python -m corp_osint --plugin tenant_domains --domain example.com
-uv run python -m corp_osint --plugin tenant_domains --tenant-id <guid>
+uv run python main.py --plugin tenant_domains --domain example.com
+uv run python main.py --plugin tenant_domains --tenant-id <guid>
 ```
 
 Uses `func-idefix-tenantlookup.azurewebsites.net/api/lookup|domains` plus
@@ -186,7 +186,7 @@ Cap: `LimitsConfig.dangling_max_domains` (default 200). Skip with `--skip dangli
 ## DNSLytics / GTM
 
 ```bash
-uv run python -m corp_osint --plugin dnslytics_gtm --domain example.com
+uv run python main.py --plugin dnslytics_gtm --domain example.com
 # optional paid API:
 export DNSLYTICS_API_KEY=...
 ```
