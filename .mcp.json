@@ -2,7 +2,7 @@
   "mcpServers": {
     "corp-osint": {
       "command": "uv",
-      "args": ["run", "--project", ".", "python", "mcp_server.py"]
+      "args": ["run", "--project", ".", "corp-osint-mcp"]
     }
   }
 }

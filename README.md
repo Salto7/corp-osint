@@ -55,29 +55,31 @@ the logger (stderr).
 
 ## MCP server
 
-Same pipeline over [MCP](https://modelcontextprotocol.io/) stdio. Open this repo
-as the workspace, run `uv sync && uv run playwright install chromium` once, then
-reload MCP tools. Config: [`.mcp.json`](.mcp.json).
+Same pipeline over [MCP](https://modelcontextprotocol.io/) stdio, usable from any
+MCP-capable agent or client (not tied to one editor). Run
+`uv sync && uv run playwright install chromium` once, then register this command
+with your host:
 
 ```json
 {
   "mcpServers": {
     "corp-osint": {
       "command": "uv",
-      "args": ["run", "--project", ".", "python", "mcp_server.py"]
+      "args": ["--directory", "/absolute/path/to/corp-osint", "run", "corp-osint-mcp"]
     }
   }
 }
 ```
 
-Flow: `set_target` → `run_pipeline` (or a plugin tool). Host cwd must be the repo
-root. Progress on stderr; stdout is MCP JSON-RPC. Details: [`docs/mcp.md`](docs/mcp.md).
+[`.mcp.json`](.mcp.json) is a ready-made project-local version. Flow:
+`set_target` → `run_pipeline` (or a plugin tool). Progress on stderr; stdout is
+MCP JSON-RPC. Setup for other hosts and `uvx`: [`docs/mcp.md`](docs/mcp.md).
 
 ## Docs & layout
 
 | Doc | Contents |
 |-----|----------|
-| [`docs/SKILL.md`](docs/SKILL.md) | Agent playbook (Cursor / Claude skills → `docs/`) |
+| [`docs/SKILL.md`](docs/SKILL.md) | Agent playbook (portable skill; copy into your agent's skills dir) |
 | [`docs/mcp.md`](docs/mcp.md) | MCP setup and tools |
 | [`docs/sources.md`](docs/sources.md) | Source notes |
 | [`docs/report-schema.md`](docs/report-schema.md) | Report JSON shape |

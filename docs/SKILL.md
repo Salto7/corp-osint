@@ -8,7 +8,7 @@ description: >
 license: Apache-2.0
 compatibility: >
   Python 3.10+, network, aiohttp, tenacity, Playwright chromium; optional whois,
-  URLSCAN_API_KEY, DNSLYTICS_API_KEY. Cursor / Claude Code / Codex compatible.
+  URLSCAN_API_KEY, DNSLYTICS_API_KEY. Works with any agent that supports skills and/or MCP.
 metadata:
   author: corp-OSINT
   version: "3.0.0"
@@ -47,7 +47,7 @@ export CORP_OSINT_PROXY='socks5://127.0.0.1:1080'
 ```
 
 **Requirements:** [uv](https://docs.astral.sh/uv/), Python 3.10+, network access.
-MCP hosts launch via `uv run` (see `.mcp.json`).
+MCP hosts launch `corp-osint-mcp` via `uv run` (see `.mcp.json`, `docs/mcp.md`).
 
 **Verify install:**
 
@@ -265,12 +265,12 @@ Report includes `summary` and `summary_text`:
 Cite sources; never invent CIKs/tenants/ASNs/GTM IDs or subsidiary domains;
 separate confirmed vs candidate; no port scans.
 
-## Agent paths
+## Using with an agent
 
-| Runner | Path |
-|--------|------|
-| Cursor | `.cursor/skills/corp-osint/` → `docs/` / `$corp-osint` |
-| Claude Code | `.claude/skills/corp-osint/` → `docs/` / `/corp-osint` |
-| Subagent | `.cursor/agents/corp-osint.md` |
+- **MCP:** register `corp-osint-mcp` with your host (see [mcp.md](mcp.md)); any MCP client works.
+- **Skill file:** this playbook is plain Markdown with front matter. Copy or link
+  `docs/` into your agent's skills/instructions location (for example a
+  `corp-osint/` skills folder) — the path is host-specific.
+- **CLI fallback:** agents without MCP can run `uv run python main.py …`.
 
 See [sources.md](sources.md) and [report-schema.md](report-schema.md).

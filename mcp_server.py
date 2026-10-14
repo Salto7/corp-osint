@@ -4,24 +4,18 @@
 Host supplies reasoning; corp-OSINT runs public-source tools via
 ``corp_osint.runtime``. Protocol / tool schemas stay here.
 
-Start::
+Start (any MCP host, stdio transport; cwd does not matter)::
 
-    .venv/bin/python mcp_server.py
+    uv --directory /path/to/corp-osint run corp-osint-mcp
+    # or, once installed:  corp-osint-mcp
 """
 
 from __future__ import annotations
 
 import contextlib
 import json
-import os
 import sys
-from pathlib import Path
 from typing import Any
-
-_ROOT = Path(__file__).resolve().parent
-if str(_ROOT) not in sys.path:
-    sys.path.insert(0, str(_ROOT))
-os.chdir(_ROOT)
 
 # Keep import-time chatter off the MCP stdout stream.
 try:
