@@ -10,13 +10,13 @@ from __future__ import annotations
 
 import json
 import re
-from typing import Any, Optional
+from typing import Any
 from urllib.parse import quote
 
-from .entra import GUID_RE, fetch_oidc, oidc_url
 from ..http import AsyncHttpClient
 from ..plugin import Plugin
 from ..util import normalize_domain
+from .entra import GUID_RE, fetch_oidc, oidc_url
 
 IDEFIX_LOOKUP = "https://func-idefix-tenantlookup.azurewebsites.net/api/lookup/{id}"
 IDEFIX_DOMAINS = "https://func-idefix-tenantlookup.azurewebsites.net/api/domains/{domain}"
@@ -138,8 +138,8 @@ class TenantDomainLookup(Plugin):
 
     async def run(
         self,
-        tenant_id: Optional[str] = None,
-        domain: Optional[str] = None,
+        tenant_id: str | None = None,
+        domain: str | None = None,
         max_domains: int = 200,
         **kwargs: Any,
     ) -> dict[str, Any]:

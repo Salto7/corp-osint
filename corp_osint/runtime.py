@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from typing import Any, Mapping
+from collections.abc import Mapping
+from typing import Any
 
 from .config import (
     HttpConfig,
@@ -15,9 +16,10 @@ from .config import (
 )
 from .http import AsyncHttpClient
 from .log import get_logger
-from .plugins.pipeline import CorpOsintPipeline
 from .plugins import PLUGIN_REGISTRY, create_plugin
+from .plugins.pipeline import CorpOsintPipeline
 from .report import ensure_summary
+from .util import normalize_domain
 
 log = get_logger("runtime")
 
@@ -58,7 +60,7 @@ def pipeline_config_from_values(
         company=company,
         cik=values.get("cik") or None,
         ticker=values.get("ticker") or None,
-        domain=values.get("domain") or None,
+        domain=normalize_domain(values.get("domain")),
         stages=stages,
         http=http_config_from_values(values),
     )
@@ -75,7 +77,7 @@ def plugin_kwargs(
     """Map flat values → kwargs for ``plugin.run``."""
     lim = limits or LimitsConfig()
     company = values.get("company")
-    domain = values.get("domain")
+    domain = normalize_domain(values.get("domain"))
     tenant_id = values.get("tenant_id")
 
     if name == "edgar":
@@ -225,7 +227,8 @@ def wrap_plugin_result(name: str, values: Mapping[str, Any], raw: Any) -> dict[s
 async def run_pipeline(values: Mapping[str, Any]) -> dict[str, Any]:
     """Execute the full CorpOsintPipeline for ``values``."""
     cfg = pipeline_config_from_values(values, require_company=True)
-    assert cfg is not None
+    if cfg is None:  # require_company=True raises first; guard for -O
+        raise ValueError("company is required")
     log.info("running full pipeline company=%s", cfg.company)
     return await CorpOsintPipeline(cfg).run()
 
@@ -238,6 +241,8 @@ async def run_plugin(name: str, values: Mapping[str, Any]) -> dict[str, Any]:
         known = ", ".join(sorted(PLUGIN_REGISTRY) + [CorpOsintPipeline.name])
         raise ValueError(f"Unknown plugin {name!r}. Known: {known}")
 
+    if values.get("domain"):
+        values = {**values, "domain": normalize_domain(values["domain"])}
     cfg = pipeline_config_from_values(values, require_company=False)
     http_cfg = cfg.http if cfg else http_config_from_values(values)
     throttle = cfg.throttle if cfg else ThrottleConfig()

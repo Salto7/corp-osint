@@ -7,11 +7,10 @@ import json
 import re
 import shutil
 import socket
-from typing import Any, Optional
+from typing import Any
 from urllib.parse import quote
 
 from ..plugin import Plugin
-from ..http import AsyncHttpClient
 
 RIPE_NET = "https://stat.ripe.net/data/network-info/data.json?resource={ip}"
 RIPE_AS = "https://stat.ripe.net/data/as-overview/data.json?resource=AS{asn}"
@@ -24,7 +23,7 @@ def _tokens(name: str) -> list[str]:
     return [t for t in re.findall(r"[a-z0-9]+", name.lower()) if t not in _STOP and len(t) > 2]
 
 
-def _match(company: str, *blobs: Optional[str]) -> dict[str, Any]:
+def _match(company: str, *blobs: str | None) -> dict[str, Any]:
     tokens = _tokens(company)
     hay = " ".join(b for b in blobs if b).lower()
     if not tokens or not hay:

@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import os
+from collections.abc import Iterable
 from dataclasses import dataclass, field, fields
-from typing import Iterable, Optional
 
 
 def _split_no_proxy(raw: str | None) -> tuple[str, ...]:
@@ -13,7 +13,7 @@ def _split_no_proxy(raw: str | None) -> tuple[str, ...]:
     return tuple(p.strip() for p in raw.replace(";", ",").split(",") if p.strip())
 
 
-def resolve_proxy_url(explicit: str | None = None) -> Optional[str]:
+def resolve_proxy_url(explicit: str | None = None) -> str | None:
     """CLI/env proxy resolution. Empty string disables env proxy."""
     if explicit is not None:
         return explicit.strip() or None

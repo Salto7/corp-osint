@@ -145,6 +145,17 @@ class CorpOsintPipeline(Plugin):
                 prev["evidence"] = (prev.get("evidence") or "") + "; parking page"
 
     async def run(self, **kwargs: Any) -> dict[str, Any]:
+        try:
+            return await self._run()
+        finally:
+            # Always release browsers, even when a stage raised unexpectedly.
+            for plug in self.plugins.values():
+                try:
+                    await plug.close()
+                except Exception as exc:  # noqa: BLE001
+                    log.debug("plugin close failed: %s", exc)
+
+    async def _run(self) -> dict[str, Any]:
         cfg = self.config
         assert cfg is not None
         errors: list[str] = []
@@ -561,7 +572,7 @@ class CorpOsintPipeline(Plugin):
                     "dangling_entra": False,
                     "dangling_entra_detail": None,
                 }
-                for k, part in zip(keys, parts):
+                for k, part in zip(keys, parts, strict=True):
                     if isinstance(part, Exception):
                         errors.append(f"{k}:{dom}: {part}")
                         continue
@@ -832,11 +843,6 @@ class CorpOsintPipeline(Plugin):
             else:
                 notes.append("dangling parked/Entra check skipped")
                 log.info("stage dangling_check skipped")
-
-            # cleanup plugins (browsers, etc.)
-            log.debug("closing plugins")
-            for plug in self.plugins.values():
-                await plug.close()
 
         entities_out = [
             e
