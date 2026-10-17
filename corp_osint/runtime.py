@@ -17,11 +17,22 @@ from .config import (
 from .http import AsyncHttpClient
 from .log import get_logger
 from .plugins import PLUGIN_REGISTRY, create_plugin
+from .plugins.entra import clear_oidc_cache
 from .plugins.pipeline import CorpOsintPipeline
 from .report import ensure_summary
 from .util import normalize_domain
 
 log = get_logger("runtime")
+
+
+def _limit(value, default=None):
+    """Optional work limit: missing / null / <=0 means unlimited."""
+    raw = default if value is None or value == "" else value
+    try:
+        n = int(raw)
+    except (TypeError, ValueError):
+        return None
+    return n if n > 0 else None
 
 
 def http_config_from_values(values: Mapping[str, Any]) -> HttpConfig:
@@ -142,7 +153,7 @@ def plugin_kwargs(
             "domain": domain,
             "domains": values.get("domains"),
             "expected_tenant_id": values.get("expected_tenant_id") or tenant_id,
-            "max_domains": int(values.get("max_domains", lim.entra_verify_max)),
+            "max_domains": _limit(values.get("max_domains"), lim.entra_verify_max),
             "concurrency": int(
                 values.get("concurrency", lim.entra_verify_concurrency)
             ),
@@ -165,7 +176,7 @@ def plugin_kwargs(
         return {
             "domain": domain,
             "tenant_id": tenant_id,
-            "max_domains": int(values.get("max_domains", lim.tenant_domains_max)),
+            "max_domains": _limit(values.get("max_domains"), lim.tenant_domains_max),
         }
 
     if name == "dangling_check":
@@ -178,7 +189,7 @@ def plugin_kwargs(
             "domains": domains,
             "entra_verified_domains": verified,
             "tenant_id": tenant_id,
-            "max_domains": int(values.get("max_domains", lim.dangling_max_domains)),
+            "max_domains": _limit(values.get("max_domains"), lim.dangling_max_domains),
         }
 
     raise ValueError(f"Unknown plugin: {name}")
@@ -243,6 +254,12 @@ async def run_plugin(name: str, values: Mapping[str, Any]) -> dict[str, Any]:
 
     if values.get("domain"):
         values = {**values, "domain": normalize_domain(values["domain"])}
+    # The OIDC cache is meant to live for one invocation only (see entra.py);
+    # the MCP server process is long-lived for a whole project/sandbox, so a
+    # standalone plugin call (azure_tenant/tenant_domains/dangling_check) must
+    # clear it itself the way run_pipeline already does, or a later call with
+    # different arguments for the same domain silently replays a stale result.
+    clear_oidc_cache()
     cfg = pipeline_config_from_values(values, require_company=False)
     http_cfg = cfg.http if cfg else http_config_from_values(values)
     throttle = cfg.throttle if cfg else ThrottleConfig()

@@ -13,7 +13,7 @@ from ..log import get_logger
 from ..plugin import Plugin
 from ..report import finalize_report
 from ..summary import _is_junk_entity_name
-from ..util import normalize_domain
+from ..util import apex_domain, is_apex_domain, normalize_domain
 from . import create_plugin
 from .entra import clear_oidc_cache
 
@@ -127,6 +127,13 @@ class CorpOsintPipeline(Plugin):
         dom = normalize_domain(domain)
         if not dom:
             return
+        if not is_apex_domain(dom):
+            # Collapse hostnames (e.g. GTM-reverse or OIDC hits on a subdomain)
+            # down to their registrable apex — a subdomain is not a new company
+            # domain, and urlscan/web_search already apex-collapse their own
+            # hits. Without this, dnslytics_gtm and the entra OIDC-verify stage
+            # (neither of which apex-filters) leak raw hostnames into results.
+            dom = apex_domain(dom) or dom
         if dom not in order:
             order.append(dom)
         prev = meta.get(dom)
